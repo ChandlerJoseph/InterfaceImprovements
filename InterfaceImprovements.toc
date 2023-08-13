@@ -1,0 +1,5 @@
+## Interface: 100105
+## SavedVariables: InterfaceImprovementsDB
+InterfaceImprovements.lua
+
+# /run print((select(4, GetBuildInfo())))
