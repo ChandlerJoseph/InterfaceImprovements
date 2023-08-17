@@ -23,20 +23,14 @@ local bars = {
 ----------------------------------------------------------------------------------------------------
 -- Functions
 ----------------------------------------------------------------------------------------------------
-local function showButtons()
+local function updateButtons(forceShow)
     for _, button in pairs(MainMenuBar.actionButtons) do
-        button:SetAlpha(1)
-    end
-end
-
-local function updateButtons()
-    if InterfaceImprovementsDB.hideEmptyButtons then
-        for _, button in pairs(MainMenuBar.actionButtons) do
-            if not button:HasAction() then
-                button:SetAlpha(0)
-            else
-                button:SetAlpha(1)
-            end
+        if InterfaceImprovementsDB.hideEmptyButtons and forceShow or GetCursorInfo() then
+            button:SetAlpha(1)
+        elseif InterfaceImprovementsDB.hideEmptyButtons and not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) and not button:HasAction() then
+            button:SetAlpha(0)
+        else
+            button:SetAlpha(1)
         end
     end
 end
@@ -112,21 +106,15 @@ end
 hooksecurefunc(ExtraActionButton1, "UpdateHotkeys", shortenHotkeys)
 
 SpellBookFrame:HookScript("OnShow", function()
-    if InterfaceImprovementsDB.hideEmptyButtons then
-        showButtons()
-    end
+    updateButtons(true)
 end)
 
 SpellBookFrame:HookScript("OnHide", function()
-    if not GetCursorInfo() then
-        updateButtons()
-    end
+    updateButtons()
 end)
 
 QuickKeybindFrame:HookScript("OnShow", function()
-    if InterfaceImprovementsDB.hideEmptyButtons then
-        showButtons()
-    end
+    updateButtons(true)
 end)
 
 QuickKeybindFrame:HookScript("OnHide", function()
@@ -148,11 +136,7 @@ hideEmptyButtonsCB:SetPoint("TOPLEFT", title, -3, -24)
 hideEmptyButtonsCB.Text:SetText("Hide Empty Buttons")
 hideEmptyButtonsCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideEmptyButtons = not InterfaceImprovementsDB.hideEmptyButtons
-    if InterfaceImprovementsDB.hideEmptyButtons then
-        updateButtons()
-    else
-        showButtons()
-    end
+    updateButtons()
 end)
 
 local hideExtraButtonArtworkCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
@@ -201,8 +185,6 @@ local event = CreateFrame("Frame")
 event:RegisterEvent("ADDON_LOADED")
 event:RegisterEvent("PLAYER_LOGIN")
 event:RegisterEvent("PLAYER_ENTERING_WORLD")
-event:RegisterEvent("ACTIONBAR_SHOWGRID")
-event:RegisterEvent("ACTIONBAR_HIDEGRID")
 event:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 event:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
 event:SetScript("OnEvent", function(self, event, ...)
@@ -223,14 +205,10 @@ end
 function event:ADDON_LOADED(name)
     if name == "Blizzard_ClassTalentUI" then
         ClassTalentFrame:HookScript("OnShow", function()
-            if InterfaceImprovementsDB.hideEmptyButtons then
-                showButtons()
-            end
+            updateButtons(true)
         end)
         ClassTalentFrame:HookScript("OnHide", function()
-            if not GetCursorInfo() then
-                updateButtons()
-            end
+            updateButtons()
         end)
     end
 end
@@ -253,34 +231,12 @@ function event:PLAYER_ENTERING_WORLD()
     updateXPBar()
 end
 
-function event:ACTIONBAR_SHOWGRID()
-    if InterfaceImprovementsDB.hideEmptyButtons then
-        showButtons()
-    end
-end
-
-function event:ACTIONBAR_HIDEGRID()
-    if not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) then
-        updateButtons()
-    end
-end
-
 function event:ACTIONBAR_SLOT_CHANGED()
-    if InterfaceImprovementsDB.hideEmptyButtons then
-        if not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) then
-            if GetCursorInfo() then
-                showButtons()
-            else
-                updateButtons()
-            end
-        end
-    end
+    updateButtons()
 end
 
 function event:UPDATE_BONUS_ACTIONBAR()
-    if not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) then
-        updateButtons()
-    end
+    updateButtons()
 end
 ----------------------------------------------------------------------------------------------------
 -- Slash Commands
