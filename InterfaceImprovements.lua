@@ -185,6 +185,7 @@ local event = CreateFrame("Frame")
 event:RegisterEvent("ADDON_LOADED")
 event:RegisterEvent("PLAYER_LOGIN")
 event:RegisterEvent("PLAYER_ENTERING_WORLD")
+event:RegisterEvent("ACTIONBAR_HIDEGRID")
 event:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 event:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
 event:SetScript("OnEvent", function(self, event, ...)
@@ -229,6 +230,12 @@ function event:PLAYER_ENTERING_WORLD()
     updateMacroNames()
     updateStanceBar()
     updateXPBar()
+end
+
+function event:ACTIONBAR_HIDEGRID()
+    C_Timer.After(0, function()
+        updateButtons()
+    end)
 end
 
 function event:ACTIONBAR_SLOT_CHANGED()
