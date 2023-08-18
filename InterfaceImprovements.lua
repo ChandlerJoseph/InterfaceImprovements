@@ -23,11 +23,13 @@ local bars = {
 ----------------------------------------------------------------------------------------------------
 -- Functions
 ----------------------------------------------------------------------------------------------------
-local function updateButtons(forceShow)
+local function updateButtons()
+    local isFrameShown = SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or ClassTalentFrame:IsShown())
+    local isFrameHidden = not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown())
     for _, button in pairs(MainMenuBar.actionButtons) do
-        if InterfaceImprovementsDB.hideEmptyButtons and forceShow or GetCursorInfo() then
+        if InterfaceImprovementsDB.hideEmptyButtons and isFrameShown or GetCursorInfo() then
             button:SetAlpha(1)
-        elseif InterfaceImprovementsDB.hideEmptyButtons and not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) and not button:HasAction() then
+        elseif InterfaceImprovementsDB.hideEmptyButtons and isFrameHidden and not button:HasAction() then
             button:SetAlpha(0)
         else
             button:SetAlpha(1)
@@ -106,7 +108,7 @@ end
 hooksecurefunc(ExtraActionButton1, "UpdateHotkeys", shortenHotkeys)
 
 SpellBookFrame:HookScript("OnShow", function()
-    updateButtons(true)
+    updateButtons()
 end)
 
 SpellBookFrame:HookScript("OnHide", function()
@@ -114,7 +116,7 @@ SpellBookFrame:HookScript("OnHide", function()
 end)
 
 QuickKeybindFrame:HookScript("OnShow", function()
-    updateButtons(true)
+    updateButtons()
 end)
 
 QuickKeybindFrame:HookScript("OnHide", function()
@@ -185,6 +187,7 @@ local event = CreateFrame("Frame")
 event:RegisterEvent("ADDON_LOADED")
 event:RegisterEvent("PLAYER_LOGIN")
 event:RegisterEvent("PLAYER_ENTERING_WORLD")
+event:RegisterEvent("ACTIONBAR_SHOWGRID")
 event:RegisterEvent("ACTIONBAR_HIDEGRID")
 event:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
 event:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
@@ -206,7 +209,7 @@ end
 function event:ADDON_LOADED(name)
     if name == "Blizzard_ClassTalentUI" then
         ClassTalentFrame:HookScript("OnShow", function()
-            updateButtons(true)
+            updateButtons()
         end)
         ClassTalentFrame:HookScript("OnHide", function()
             updateButtons()
@@ -232,10 +235,12 @@ function event:PLAYER_ENTERING_WORLD()
     updateXPBar()
 end
 
+function event:ACTIONBAR_SHOWGRID()
+    updateButtons()
+end
+
 function event:ACTIONBAR_HIDEGRID()
-    C_Timer.After(0, function()
-        updateButtons()
-    end)
+    updateButtons()
 end
 
 function event:ACTIONBAR_SLOT_CHANGED()
