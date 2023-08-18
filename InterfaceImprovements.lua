@@ -240,7 +240,9 @@ function event:ACTIONBAR_SHOWGRID()
 end
 
 function event:ACTIONBAR_HIDEGRID()
-    updateButtons()
+    C_Timer.After(0, function()
+        updateButtons()
+    end)
 end
 
 function event:ACTIONBAR_SLOT_CHANGED()
