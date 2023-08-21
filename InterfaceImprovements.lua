@@ -204,9 +204,6 @@ function event:ADDON_LOADED(name)
             end
         end
     end
-end
-
-function event:ADDON_LOADED(name)
     if name == "Blizzard_ClassTalentUI" then
         ClassTalentFrame:HookScript("OnShow", function()
             updateButtons()
