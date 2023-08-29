@@ -23,7 +23,7 @@ local bars = {
 ----------------------------------------------------------------------------------------------------
 -- Functions
 ----------------------------------------------------------------------------------------------------
-local function updateButtons()
+local function updateEmptyButtons()
     local isFrameShown = SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or ClassTalentFrame:IsShown())
     local isFrameHidden = not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown())
     for _, button in pairs(MainMenuBar.actionButtons) do
@@ -35,6 +35,12 @@ local function updateButtons()
             button:SetAlpha(1)
         end
     end
+end
+
+local function updateExtraButtonArtwork()
+    local alpha = InterfaceImprovementsDB.hideExtraButtonArtwork and 0 or 1
+    ExtraActionButton1.style:SetAlpha(alpha)
+    ZoneAbilityFrame.Style:SetAlpha(alpha)
 end
 
 local function updateHotkeys()
@@ -56,12 +62,6 @@ local function updateMacroNames()
             button.Name:SetAlpha(alpha)
         end
     end
-end
-
-local function updateExtraButtonArtwork()
-    local alpha = InterfaceImprovementsDB.hideExtraButtonArtwork and 0 or 1
-    ExtraActionButton1.style:SetAlpha(alpha)
-    ZoneAbilityFrame.Style:SetAlpha(alpha)
 end
 
 local function updateStanceBar()
@@ -108,19 +108,19 @@ end
 hooksecurefunc(ExtraActionButton1, "UpdateHotkeys", shortenHotkeys)
 
 SpellBookFrame:HookScript("OnShow", function()
-    updateButtons()
+    updateEmptyButtons()
 end)
 
 SpellBookFrame:HookScript("OnHide", function()
-    updateButtons()
+    updateEmptyButtons()
 end)
 
 QuickKeybindFrame:HookScript("OnShow", function()
-    updateButtons()
+    updateEmptyButtons()
 end)
 
 QuickKeybindFrame:HookScript("OnHide", function()
-    updateButtons()
+    updateEmptyButtons()
 end)
 ----------------------------------------------------------------------------------------------------
 -- Config
@@ -129,53 +129,51 @@ local panel = CreateFrame("Frame")
 panel.name = "InterfaceImprovements"
 InterfaceOptions_AddCategory(panel)
 
-local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 title:SetPoint("TOPLEFT", panel, 16, -16)
 title:SetText("InterfaceImprovements")
 
-local hideEmptyButtonsCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-hideEmptyButtonsCB:SetPoint("TOPLEFT", title, -3, -24)
-hideEmptyButtonsCB.Text:SetText("Hide Empty Buttons")
+local offsetY = -9
+local function createCheckButton(name)
+    offsetY = offsetY - 31
+    local checkButton = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
+    checkButton:SetPoint("TOPLEFT", panel, 13, offsetY)
+    checkButton.Text:SetText(name)
+    checkButton.Text:SetTextColor(1, 1, 1, 1)
+    return checkButton
+end
+
+local hideEmptyButtonsCB = createCheckButton("Hide Empty Buttons")
 hideEmptyButtonsCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideEmptyButtons = not InterfaceImprovementsDB.hideEmptyButtons
-    updateButtons()
+    updateEmptyButtons()
 end)
 
-local hideExtraButtonArtworkCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-hideExtraButtonArtworkCB:SetPoint("CENTER", hideEmptyButtonsCB, 0, -31)
-hideExtraButtonArtworkCB.Text:SetText("Hide Extra Button Artwork")
+local hideExtraButtonArtworkCB = createCheckButton("Hide Extra Button Artwork")
 hideExtraButtonArtworkCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideExtraButtonArtwork = not InterfaceImprovementsDB.hideExtraButtonArtwork
     updateExtraButtonArtwork()
 end)
 
-local hideHotkeysCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-hideHotkeysCB:SetPoint("CENTER", hideExtraButtonArtworkCB, 0, -31)
-hideHotkeysCB.Text:SetText("Hide Hotkeys")
+local hideHotkeysCB = createCheckButton("Hide Hotkeys")
 hideHotkeysCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideHotkeys = not InterfaceImprovementsDB.hideHotkeys
     updateHotkeys()
 end)
 
-local hideMacroNamesCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-hideMacroNamesCB:SetPoint("CENTER", hideHotkeysCB, 0, -31)
-hideMacroNamesCB.Text:SetText("Hide Macro Names")
+local hideMacroNamesCB = createCheckButton("Hide Macro Names")
 hideMacroNamesCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideMacroNames = not InterfaceImprovementsDB.hideMacroNames
     updateMacroNames()
 end)
 
-local hideStanceBarCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-hideStanceBarCB:SetPoint("CENTER", hideMacroNamesCB, 0, -31)
-hideStanceBarCB.Text:SetText("Hide Stance Bar")
+local hideStanceBarCB = createCheckButton("Hide Stance Bar")
 hideStanceBarCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideStanceBar = not InterfaceImprovementsDB.hideStanceBar
     updateStanceBar()
 end)
 
-local hideXPBarCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-hideXPBarCB:SetPoint("CENTER", hideStanceBarCB, 0, -31)
-hideXPBarCB.Text:SetText("Hide XP Bar")
+local hideXPBarCB = createCheckButton("Hide XP Bar")
 hideXPBarCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideXPBar = not InterfaceImprovementsDB.hideXPBar
     updateXPBar()
@@ -206,10 +204,10 @@ function event:ADDON_LOADED(name)
     end
     if name == "Blizzard_ClassTalentUI" then
         ClassTalentFrame:HookScript("OnShow", function()
-            updateButtons()
+            updateEmptyButtons()
         end)
         ClassTalentFrame:HookScript("OnHide", function()
-            updateButtons()
+            updateEmptyButtons()
         end)
     end
 end
@@ -224,7 +222,7 @@ function event:PLAYER_LOGIN()
 end
 
 function event:PLAYER_ENTERING_WORLD()
-    updateButtons()
+    updateEmptyButtons()
     updateExtraButtonArtwork()
     updateHotkeys()
     updateMacroNames()
@@ -233,27 +231,27 @@ function event:PLAYER_ENTERING_WORLD()
 end
 
 function event:ACTIONBAR_SHOWGRID()
-    updateButtons()
+    updateEmptyButtons()
 end
 
 function event:ACTIONBAR_HIDEGRID()
     C_Timer.After(0, function()
-        updateButtons()
+        updateEmptyButtons()
     end)
 end
 
 function event:ACTIONBAR_SLOT_CHANGED()
-    updateButtons()
+    updateEmptyButtons()
 end
 
 function event:UPDATE_BONUS_ACTIONBAR()
-    updateButtons()
+    updateEmptyButtons()
 end
 ----------------------------------------------------------------------------------------------------
 -- Slash Commands
 ----------------------------------------------------------------------------------------------------
 SLASH_reloadUI1 = "/rl"
-SlashCmdList.reloadUI = reloadUI
+SlashCmdList.reloadUI = ReloadUI
 
 SLASH_fStack1 = "/fs"
 SlashCmdList.fStack = function()
