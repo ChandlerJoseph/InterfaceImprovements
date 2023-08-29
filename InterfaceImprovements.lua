@@ -5,6 +5,7 @@ local defaults = {
     hideEmptyButtons = false,
     hideExtraButtonArtwork = false,
     hideHotkeys = false,
+    hideLOCBackground = false,
     hideMacroNames = false,
     hideStanceBar = false,
     hideXPBar = false,
@@ -37,6 +38,11 @@ local function updateEmptyButtons()
     end
 end
 
+SpellBookFrame:HookScript("OnShow", updateEmptyButtons)
+SpellBookFrame:HookScript("OnHide", updateEmptyButtons)
+QuickKeybindFrame:HookScript("OnShow", updateEmptyButtons)
+QuickKeybindFrame:HookScript("OnHide", updateEmptyButtons)
+
 local function updateExtraButtonArtwork()
     local alpha = InterfaceImprovementsDB.hideExtraButtonArtwork and 0 or 1
     ExtraActionButton1.style:SetAlpha(alpha)
@@ -53,6 +59,13 @@ local function updateHotkeys()
     for _, button in pairs(PetActionBar.actionButtons) do
         button.HotKey:SetAlpha(alpha)
     end
+end
+
+local function updateLOCBackground()
+    local alpha = InterfaceImprovementsDB.hideLOCBackground and 0 or 1
+    LossOfControlFrame.RedLineTop:SetAlpha(alpha)
+    LossOfControlFrame.RedLineBottom:SetAlpha(alpha)
+    LossOfControlFrame.blackBg:SetAlpha(alpha)
 end
 
 local function updateMacroNames()
@@ -106,22 +119,6 @@ for i = 1, 6 do
 end
 
 hooksecurefunc(ExtraActionButton1, "UpdateHotkeys", shortenHotkeys)
-
-SpellBookFrame:HookScript("OnShow", function()
-    updateEmptyButtons()
-end)
-
-SpellBookFrame:HookScript("OnHide", function()
-    updateEmptyButtons()
-end)
-
-QuickKeybindFrame:HookScript("OnShow", function()
-    updateEmptyButtons()
-end)
-
-QuickKeybindFrame:HookScript("OnHide", function()
-    updateEmptyButtons()
-end)
 ----------------------------------------------------------------------------------------------------
 -- Config
 ----------------------------------------------------------------------------------------------------
@@ -139,42 +136,48 @@ local function createCheckButton(name)
     local checkButton = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
     checkButton:SetPoint("TOPLEFT", panel, 13, offsetY)
     checkButton.Text:SetText(name)
-    checkButton.Text:SetTextColor(1, 1, 1, 1)
+    checkButton.Text:SetTextColor(1, 1, 1)
     return checkButton
 end
 
-local hideEmptyButtonsCB = createCheckButton("Hide Empty Buttons")
-hideEmptyButtonsCB:SetScript("OnClick", function()
+local updateEmptyButtonsCB = createCheckButton("Hide Empty Buttons")
+updateEmptyButtonsCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideEmptyButtons = not InterfaceImprovementsDB.hideEmptyButtons
     updateEmptyButtons()
 end)
 
-local hideExtraButtonArtworkCB = createCheckButton("Hide Extra Button Artwork")
-hideExtraButtonArtworkCB:SetScript("OnClick", function()
+local updateExtraButtonArtworkCB = createCheckButton("Hide Extra Button Artwork")
+updateExtraButtonArtworkCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideExtraButtonArtwork = not InterfaceImprovementsDB.hideExtraButtonArtwork
     updateExtraButtonArtwork()
 end)
 
-local hideHotkeysCB = createCheckButton("Hide Hotkeys")
-hideHotkeysCB:SetScript("OnClick", function()
+local updateHotkeysCB = createCheckButton("Hide Hotkeys")
+updateHotkeysCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideHotkeys = not InterfaceImprovementsDB.hideHotkeys
     updateHotkeys()
 end)
 
-local hideMacroNamesCB = createCheckButton("Hide Macro Names")
-hideMacroNamesCB:SetScript("OnClick", function()
+local updateLOCBackgroundCB = createCheckButton("Hide Loss of Control Background")
+updateLOCBackgroundCB:SetScript("OnClick", function()
+    InterfaceImprovementsDB.hideLOCBackground = not InterfaceImprovementsDB.hideLOCBackground
+    updateLOCBackground()
+end)
+
+local updateMacroNamesCB = createCheckButton("Hide Macro Names")
+updateMacroNamesCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideMacroNames = not InterfaceImprovementsDB.hideMacroNames
     updateMacroNames()
 end)
 
-local hideStanceBarCB = createCheckButton("Hide Stance Bar")
-hideStanceBarCB:SetScript("OnClick", function()
+local updateStanceBarCB = createCheckButton("Hide Stance Bar")
+updateStanceBarCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideStanceBar = not InterfaceImprovementsDB.hideStanceBar
     updateStanceBar()
 end)
 
-local hideXPBarCB = createCheckButton("Hide XP Bar")
-hideXPBarCB:SetScript("OnClick", function()
+local updateXPBarCB = createCheckButton("Hide XP Bar")
+updateXPBarCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideXPBar = not InterfaceImprovementsDB.hideXPBar
     updateXPBar()
 end)
@@ -203,28 +206,26 @@ function event:ADDON_LOADED(name)
         end
     end
     if name == "Blizzard_ClassTalentUI" then
-        ClassTalentFrame:HookScript("OnShow", function()
-            updateEmptyButtons()
-        end)
-        ClassTalentFrame:HookScript("OnHide", function()
-            updateEmptyButtons()
-        end)
+        ClassTalentFrame:HookScript("OnShow", updateEmptyButtons)
+        ClassTalentFrame:HookScript("OnHide", updateEmptyButtons)
     end
 end
 
 function event:PLAYER_LOGIN()
-    hideEmptyButtonsCB:SetChecked(InterfaceImprovementsDB.hideEmptyButtons)
-    hideExtraButtonArtworkCB:SetChecked(InterfaceImprovementsDB.hideExtraButtonArtwork)
-    hideHotkeysCB:SetChecked(InterfaceImprovementsDB.hideHotkeys)
-    hideMacroNamesCB:SetChecked(InterfaceImprovementsDB.hideMacroNames)
-    hideStanceBarCB:SetChecked(InterfaceImprovementsDB.hideStanceBar)
-    hideXPBarCB:SetChecked(InterfaceImprovementsDB.hideXPBar)
+    updateEmptyButtonsCB:SetChecked(InterfaceImprovementsDB.hideEmptyButtons)
+    updateExtraButtonArtworkCB:SetChecked(InterfaceImprovementsDB.hideExtraButtonArtwork)
+    updateHotkeysCB:SetChecked(InterfaceImprovementsDB.hideHotkeys)
+    updateLOCBackgroundCB:SetChecked(InterfaceImprovementsDB.hideLOCBackground)
+    updateMacroNamesCB:SetChecked(InterfaceImprovementsDB.hideMacroNames)
+    updateStanceBarCB:SetChecked(InterfaceImprovementsDB.hideStanceBar)
+    updateXPBarCB:SetChecked(InterfaceImprovementsDB.hideXPBar)
 end
 
 function event:PLAYER_ENTERING_WORLD()
     updateEmptyButtons()
     updateExtraButtonArtwork()
     updateHotkeys()
+    updateLOCBackground()
     updateMacroNames()
     updateStanceBar()
     updateXPBar()
@@ -235,9 +236,7 @@ function event:ACTIONBAR_SHOWGRID()
 end
 
 function event:ACTIONBAR_HIDEGRID()
-    C_Timer.After(0, function()
-        updateEmptyButtons()
-    end)
+    C_Timer.After(0, updateEmptyButtons)
 end
 
 function event:ACTIONBAR_SLOT_CHANGED()
