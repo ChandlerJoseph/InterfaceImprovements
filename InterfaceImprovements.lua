@@ -24,8 +24,8 @@ local bars = {
 -- Functions
 ----------------------------------------------------------------------------------------------------
 local function updateEmptyButtons()
-    local isFrameShown = SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or ClassTalentFrame:IsShown())
-    local isFrameHidden = not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown())
+    local isFrameShown = SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or ClassTalentFrame:IsShown()) and QuickKeybindFrame:IsShown()
+    local isFrameHidden = not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) and not QuickKeybindFrame:IsShown()
     for _, button in pairs(MainMenuBar.actionButtons) do
         if InterfaceImprovementsDB.hideEmptyButtons and isFrameShown or GetCursorInfo() then
             button:SetAlpha(1)
