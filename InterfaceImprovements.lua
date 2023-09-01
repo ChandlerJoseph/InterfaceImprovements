@@ -127,16 +127,16 @@ panel.name = "InterfaceImprovements"
 InterfaceOptions_AddCategory(panel)
 
 local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-title:SetPoint("TOPLEFT", panel, 16, -16)
+title:SetPoint("TOPLEFT", panel, 15, -15)
 title:SetText("InterfaceImprovements")
 
-local offsetY = -9
+local offsetY = -10
 local function createCheckButton(name)
-    offsetY = offsetY - 31
-    local checkButton = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-    checkButton:SetPoint("TOPLEFT", panel, 13, offsetY)
+    offsetY = offsetY - 30
+    local checkButton = CreateFrame("CheckButton", nil, panel, "ChatConfigCheckButtonTemplate")
+    checkButton:SetPoint("TOPLEFT", panel, 15, offsetY)
     checkButton.Text:SetText(name)
-    checkButton.Text:SetTextColor(1, 1, 1)
+    checkButton.Text:SetPoint("LEFT", checkButton, "RIGHT")
     return checkButton
 end
 
