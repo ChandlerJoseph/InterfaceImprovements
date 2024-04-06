@@ -1,5 +1,5 @@
-## Interface: 100107
-## Version: 2.0.5
+## Interface: 100206
+## Version: 2.1.0
 ## SavedVariables: InterfaceImprovementsDB
 InterfaceImprovements.lua
 
