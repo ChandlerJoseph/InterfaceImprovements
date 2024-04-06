@@ -2,7 +2,6 @@
 -- Tables
 ----------------------------------------------------------------------------------------------------
 local defaults = {
-    hideEmptyButtons = false,
     hideExtraButtonArtwork = false,
     hideHotkeys = false,
     hideLOCBackground = false,
@@ -24,25 +23,6 @@ local bars = {
 ----------------------------------------------------------------------------------------------------
 -- Functions
 ----------------------------------------------------------------------------------------------------
-local function updateEmptyButtons()
-    local isFrameShown = SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or ClassTalentFrame:IsShown()) and QuickKeybindFrame:IsShown()
-    local isFrameHidden = not SpellBookFrame:IsShown() and (not IsAddOnLoaded("Blizzard_ClassTalentUI") or not ClassTalentFrame:IsShown()) and not QuickKeybindFrame:IsShown()
-    for _, button in pairs(MainMenuBar.actionButtons) do
-        if InterfaceImprovementsDB.hideEmptyButtons and isFrameShown or GetCursorInfo() then
-            button:SetAlpha(1)
-        elseif InterfaceImprovementsDB.hideEmptyButtons and isFrameHidden and not button:HasAction() then
-            button:SetAlpha(0)
-        else
-            button:SetAlpha(1)
-        end
-    end
-end
-
-SpellBookFrame:HookScript("OnShow", updateEmptyButtons)
-SpellBookFrame:HookScript("OnHide", updateEmptyButtons)
-QuickKeybindFrame:HookScript("OnShow", updateEmptyButtons)
-QuickKeybindFrame:HookScript("OnHide", updateEmptyButtons)
-
 local function updateExtraButtonArtwork()
     local alpha = InterfaceImprovementsDB.hideExtraButtonArtwork and 0 or 1
     ExtraActionButton1.style:SetAlpha(alpha)
@@ -140,12 +120,6 @@ local function createCheckButton(name)
     return checkButton
 end
 
-local updateEmptyButtonsCB = createCheckButton("Hide Empty Buttons")
-updateEmptyButtonsCB:SetScript("OnClick", function()
-    InterfaceImprovementsDB.hideEmptyButtons = not InterfaceImprovementsDB.hideEmptyButtons
-    updateEmptyButtons()
-end)
-
 local updateExtraButtonArtworkCB = createCheckButton("Hide Extra Button Artwork")
 updateExtraButtonArtworkCB:SetScript("OnClick", function()
     InterfaceImprovementsDB.hideExtraButtonArtwork = not InterfaceImprovementsDB.hideExtraButtonArtwork
@@ -188,10 +162,6 @@ local event = CreateFrame("Frame")
 event:RegisterEvent("ADDON_LOADED")
 event:RegisterEvent("PLAYER_LOGIN")
 event:RegisterEvent("PLAYER_ENTERING_WORLD")
-event:RegisterEvent("ACTIONBAR_SHOWGRID")
-event:RegisterEvent("ACTIONBAR_HIDEGRID")
-event:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-event:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
 event:SetScript("OnEvent", function(self, event, ...)
     self[event](self, ...)
 end)
@@ -205,14 +175,9 @@ function event:ADDON_LOADED(name)
             end
         end
     end
-    if name == "Blizzard_ClassTalentUI" then
-        ClassTalentFrame:HookScript("OnShow", updateEmptyButtons)
-        ClassTalentFrame:HookScript("OnHide", updateEmptyButtons)
-    end
 end
 
 function event:PLAYER_LOGIN()
-    updateEmptyButtonsCB:SetChecked(InterfaceImprovementsDB.hideEmptyButtons)
     updateExtraButtonArtworkCB:SetChecked(InterfaceImprovementsDB.hideExtraButtonArtwork)
     updateHotkeysCB:SetChecked(InterfaceImprovementsDB.hideHotkeys)
     updateLOCBackgroundCB:SetChecked(InterfaceImprovementsDB.hideLOCBackground)
@@ -222,29 +187,12 @@ function event:PLAYER_LOGIN()
 end
 
 function event:PLAYER_ENTERING_WORLD()
-    updateEmptyButtons()
     updateExtraButtonArtwork()
     updateHotkeys()
     updateLOCBackground()
     updateMacroNames()
     updateStanceBar()
     updateXPBar()
-end
-
-function event:ACTIONBAR_SHOWGRID()
-    updateEmptyButtons()
-end
-
-function event:ACTIONBAR_HIDEGRID()
-    C_Timer.After(0, updateEmptyButtons)
-end
-
-function event:ACTIONBAR_SLOT_CHANGED()
-    updateEmptyButtons()
-end
-
-function event:UPDATE_BONUS_ACTIONBAR()
-    updateEmptyButtons()
 end
 ----------------------------------------------------------------------------------------------------
 -- Slash Commands
